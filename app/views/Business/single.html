@@ -1,0 +1,130 @@
+#{extends 'main.html' /}
+#{set title:'index.html' /}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+
+
+                *{<div class="search-form">}*
+                    *{<form action="@{controllers.Business.query()}" method="get">}*
+                        *{<div class="input-group">}*
+                            *{<input type="text" placeholder="${keyword}" name="keyword" id="keyword" class="form-control input-lg">}*
+                            *{<div class="input-group-btn">}*
+                                *{<button class="btn btn-lg btn-primary" type="submit">}*
+                                    *{搜索}*
+                                *{</button>}*
+                            *{</div>}*
+                        *{</div>}*
+
+                    *{</form>}*
+                *{</div>}*
+
+                *{<small>Request time  (0.23 seconds)</small>}*
+
+
+                    <div role="toolbar" class="q-toolbar">
+                        <div>
+                            <div id="toolbar"></div>
+                            <div id="demo_menu" class="q-right">
+                                <div id="btnJSONShow" title="JSON Export" class="btn btn-default btn-sm">
+                                    <div class="q-icon toolbar-json"></div>
+                                </div>
+                                <div title="Maximize" id="maximize" class="btn btn-default btn-sm">
+                                    <div class="q-icon toolbar-max"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="main" style="height:800px">
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+#{set 'moreScripts'}
+<script src="@{'/public/js/echarts.min.js'}" ></script>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var dom = document.getElementById('main');
+    var graph = new Q.Graph('main');
+    graph.originAtCenter = false;
+    var toolbar = Q.createToolbar(graph, document.getElementById("toolbar"));
+
+    var nodeMap = new Map();
+
+    function createText(label, x, y) {
+        var node = graph.createText(label, x, y);
+        node.setStyle(Q.Styles.LABEL_BORDER, 1);
+        node.setStyle(Q.Styles.LABEL_PADDING, 15);
+        node.setStyle(Q.Styles.LABEL_BACKGROUND_COLOR, "#FFF");
+        return node;
+    }
+
+    function createStep(label, x, y, title){
+        var titleNode = graph.createText(title, x, y - 5);
+        titleNode.setStyle(Q.Styles.LABEL_BACKGROUND_COLOR, "#1D4876");
+        titleNode.setStyle(Q.Styles.LABEL_COLOR, "#FFF");
+        titleNode.setStyle(Q.Styles.LABEL_PADDING, 5);
+        titleNode.anchorPosition = Q.Position.LEFT_BOTTOM;
+        var node = graph.createText(label, x, y);
+        node.setStyle(Q.Styles.LABEL_BORDER, 1);
+        node.setStyle(Q.Styles.LABEL_BACKGROUND_COLOR, "#FFF");
+        node.setStyle(Q.Styles.LABEL_BORDER_STYLE, "#1D4876");
+        node.setStyle(Q.Styles.LABEL_FONT_SIZE, 20);
+        node.setStyle(Q.Styles.LABEL_SIZE, new Q.Size(120, 50));
+        node.anchorPosition = Q.Position.LEFT_TOP;
+
+        titleNode.host = node;
+        node.host = titleNode;
+        return node;
+    }
+
+    function createEdge(source, target, lineWidth, dash){
+        var from = nodeMap.get(source);
+        var to = nodeMap.get(target);
+
+        var edge = graph.createEdge(from, to, dash);
+        edge.setStyle(Q.Styles.EDGE_WIDTH, lineWidth || 3);
+        edge.setStyle(Q.Styles.EDGE_COLOR, "#1D4876");
+        if(dash){
+            edge.setStyle(Q.Styles.EDGE_LINE_DASH, [10, 10]);
+        }
+        if(dash == '引用'){
+            to.setStyle(Q.Styles.LABEL_RADIUS, 60);
+            to.setStyle(Q.Styles.LABEL_BACKGROUND_COLOR, "#2898E0");
+            edge.setStyle(Q.Styles.ARROW_TO, false);
+        }
+
+        return edge;
+    }
+
+    var uploadedDataURL = "";
+
+
+    $.getJSON("@{controllers.Business.searchAll(keyword)}", function(data) {
+
+        for(x in data.nodes) {
+            var node = data.nodes[x];
+            var n = createText(node.displayname, node.x, node.y);
+            nodeMap.set(node.name, n);
+        }
+
+        for(y in data.links) {
+            var n = data.links[y];
+            console.log(n);
+            createEdge(n.source, n.target,null, n.value)
+        }
+
+        graph.moveToCenter();
+
+
+
+    });
+</script>
+
+#{/set}
