@@ -402,8 +402,10 @@ public class Business extends CRUD {
 
 	public static void searchAll(String keyword) {
 		String query="";
-		if(keyword!=null){
+		String keyId = ""; // ljl
+		if(keyword != null){
 			keyword = keyword.toUpperCase();
+			keyId = keyword.substring(0,2);
 			if(keyword.contains(",")){
 				for(String k:keyword.split(",")){
 					if(!query.equals("")){
@@ -475,6 +477,8 @@ public class Business extends CRUD {
 			node.name = _busi.business_id;
 			node.displayname= node.name+"\n"+_busi.name +"\n"+_busi.description;
 			node.category = _busi.professional;
+			node.source = _busi.business_id;
+			node.target = _busi.post_business_id;
 			node.x=_x_min + (i*_x_d);
 			node.y=_y_min + (i*_y_d);
 			if(!nodeSet.contains(node.name)) {
@@ -492,18 +496,37 @@ public class Business extends CRUD {
 				categoryList.add(category);
 				categorySet.add(category.name);
 			}
-
-			node = new TempNode();
-			node.name = _busi.post_business_id;
-			node.displayname= node.name+"\n"+_busi.post_business_name +"\n"+_busi.post_business_description;
-			node.category = _busi.post_professional;
-			node.x = _x_min + _x_d ;
-			node.y = _y_min +((i-_businesses.size()/2)*_y_d);
-			if(!nodeSet.contains(node.name)) {
-				nodeList.add(node);
-				nodeSet.add(node.name);
+			
+			if(keyId.equalsIgnoreCase("GH")){
+				if( _busi.post_business_id.substring(0, 2).equalsIgnoreCase("GH")){ //ljl
+					node = new TempNode();
+					node.name = _busi.post_business_id;
+					node.displayname= node.name+"\n"+_busi.post_business_name +"\n"+_busi.post_business_description;
+					node.category = _busi.post_professional;
+					node.source = _busi.business_id;
+					node.target = _busi.post_business_id;
+					node.x = _x_min + _x_d ;
+					node.y = _y_min +((i-_businesses.size()/2)*_y_d);
+					if(!nodeSet.contains(node.name)) {
+						nodeList.add(node);
+						nodeSet.add(node.name);
+					}
+				}
+			}else{
+				node = new TempNode();
+				node.name = _busi.post_business_id;
+				node.displayname= node.name+"\n"+_busi.post_business_name +"\n"+_busi.post_business_description;
+				node.category = _busi.post_professional;
+				node.source = _busi.business_id;
+				node.target = _busi.post_business_id;
+				node.x = _x_min + _x_d ;
+				node.y = _y_min +((i-_businesses.size()/2)*_y_d);
+				if(!nodeSet.contains(node.name)) {
+					nodeList.add(node);
+					nodeSet.add(node.name);
+				}
 			}
-
+			
 			category = new TempCategory();
 			category.name = _busi.post_professional;
 			if(!categorySet.contains(category.name)) {
@@ -559,76 +582,176 @@ public class Business extends CRUD {
 		TempCategory category = null;
 		TempLink link = null;
 		List<TCfgBusiness> _child_businesses = TCfgBusiness.find("business_id",_next_id).fetch();
+		if(_child_businesses == null || _child_businesses.size() == 0){
+			TempNode nodetmp =  nodeList.get(nodeList.size()-1);
+			if(nodetmp.name.startsWith("GH")){
+				nodetmp.isleaf = true;
+			}
+		}
+		//ljl
+		String keyId = "";
+		if(keyword != null){
+			keyId = keyword.substring(0,2);
+		}
+		
 		int i=0;
 		for(TCfgBusiness _busi: _child_businesses){
-			node = new TempNode();
-			node.name = _busi.post_business_id;
-			node.displayname= node.name+"\n"+_busi.post_business_name +"\n"+_busi.post_business_description;
-			node.category = _busi.post_professional;
-			node.x = x + _x_d;
+			if(keyId.equalsIgnoreCase("GH")){
+				if(_busi.post_business_id.substring(0, 2).equalsIgnoreCase("GH")){
+					node = new TempNode();
+					node.name = _busi.post_business_id;
+					node.displayname= node.name+"\n"+_busi.post_business_name +"\n"+_busi.post_business_description;
+					node.category = _busi.post_professional;
+					node.source = _busi.business_id;
+					node.target = _busi.post_business_id;
+					node.x = x + _x_d;
 
-			if(_child_businesses.size()>1){
-				node.y = y + _y_d *(i-_child_businesses.size()/2);
-			} else {
-				node.y = y + _y_d * (i);
-			}
-//			if(node.x.intValue()>1024){
-//				node.y = y + _y_d * (i)*2;
-//			}else {
-//
-//			}
+					if(_child_businesses.size()>1){
+						node.y = y + _y_d *(i-_child_businesses.size()/2);
+					} else {
+						node.y = y + _y_d * (i);
+					}
+//					if(node.x.intValue()>1024){
+//						node.y = y + _y_d * (i)*2;
+//					}else {
+		//
+//					}
 
-			if(!nodeSet.contains(node.name)) {
-				nodeList.add(node);
-				nodeSet.add(node.name);
-			}
+					if(!nodeSet.contains(node.name)) {
+						nodeList.add(node);
+						nodeSet.add(node.name);
+					}
 
-			if(!leaderSet.contains(_busi.business_id)){
-				leaderSet.add(_busi.business_id);
-			}
+					if(!leaderSet.contains(_busi.business_id)){
+						leaderSet.add(_busi.business_id);
+					}
 
-			category = new TempCategory();
-			category.name = _busi.post_professional;
-			if(!categorySet.contains(category.name)) {
-				categoryList.add(category);
-				categorySet.add(category.name);
-			}
+					category = new TempCategory();
+					category.name = _busi.post_professional;
+					if(!categorySet.contains(category.name)) {
+						categoryList.add(category);
+						categorySet.add(category.name);
+					}
 
-			link = new TempLink();
-			link.source = _busi.business_id;
-			link.target = _busi.post_business_id;
-			link.value = _busi.relation;
-			if(!linkSet.contains(link.source+"-"+link.target)) {
-				linkList.add(link);
-				linkSet.add(link.source+"-"+link.target);
-			}
+					link = new TempLink();
+					link.source = _busi.business_id;
+					link.target = _busi.post_business_id;
+					link.value = _busi.relation;
+					if(!linkSet.contains(link.source+"-"+link.target)) {
+						linkList.add(link);
+						linkSet.add(link.source+"-"+link.target);
+					}
 
-			Boolean _r = false;
-			if(keyword!=null){
-				keyword = keyword.toUpperCase();
-				if(keyword.contains(",")){
-					for(String k:keyword.split(",")){
-						Logger.info(k+"-"+_busi.post_business_id);
-						if(_busi.post_business_id.equalsIgnoreCase(k)){
+					Boolean _r = false;
+					if(keyword!=null){
+						keyword = keyword.toUpperCase();
+						if(keyword.contains(",")){
+							for(String k:keyword.split(",")){
+								Logger.info(k+"-"+_busi.post_business_id);
+								if(_busi.post_business_id.equalsIgnoreCase(k)){
+									Logger.info(k+"-"+_busi.post_business_id);
+									_r = true;
+								}
+							}
+						}
+					}
+
+
+					xx++;
+					if(_busi.relation.equalsIgnoreCase("引用")){
+						break;
+					}
+					if(!_r) {
+						if (!leaderSet.contains(_busi.post_business_id)) {
+							findNext(leaderSet, nodeSet, linkSet, categorySet, nodeList, linkList, categoryList, _busi.post_business_id, keyword, node.x, node.y, _x_d, _y_d,xx);
+						}
+					}
+					i++;
+				}
+				
+			}else{
+//				if(_busi.relation.equalsIgnoreCase("后置") && _busi.business_id.contains("GH")){
+//					TCfgBusiness tmp = TCfgBusiness.find("business_id",_busi.post_business_id).first();
+//					if(tmp != null ){
+//						
+//					}
+//					if(tmp.relation.equals("后置") && _busi.business_id.contains("GH")){
+//						break;
+//					}
+//					if(tmp == null){
+//						continue;
+//					}
+//				}
+				node = new TempNode();
+				node.name = _busi.post_business_id;
+				node.displayname= node.name+"\n"+_busi.post_business_name +"\n"+_busi.post_business_description;
+				node.category = _busi.post_professional;
+				node.source = _busi.business_id;
+				node.target = _busi.post_business_id;
+				node.x = x + _x_d;
+
+				if(_child_businesses.size()>1){
+					node.y = y + _y_d *(i-_child_businesses.size()/2);
+				} else {
+					node.y = y + _y_d * (i);
+				}
+//				if(node.x.intValue()>1024){
+//					node.y = y + _y_d * (i)*2;
+//				}else {
+	//
+//				}
+
+				if(!nodeSet.contains(node.name)) {
+					nodeList.add(node);
+					nodeSet.add(node.name);
+				}
+
+				if(!leaderSet.contains(_busi.business_id)){
+					leaderSet.add(_busi.business_id);
+				}
+
+				category = new TempCategory();
+				category.name = _busi.post_professional;
+				if(!categorySet.contains(category.name)) {
+					categoryList.add(category);
+					categorySet.add(category.name);
+				}
+
+				link = new TempLink();
+				link.source = _busi.business_id;
+				link.target = _busi.post_business_id;
+				link.value = _busi.relation;
+				if(!linkSet.contains(link.source+"-"+link.target)) {
+					linkList.add(link);
+					linkSet.add(link.source+"-"+link.target);
+				}
+
+				Boolean _r = false;
+				if(keyword!=null){
+					keyword = keyword.toUpperCase();
+					if(keyword.contains(",")){
+						for(String k:keyword.split(",")){
 							Logger.info(k+"-"+_busi.post_business_id);
-							_r = true;
+							if(_busi.post_business_id.equalsIgnoreCase(k)){
+								Logger.info(k+"-"+_busi.post_business_id);
+								_r = true;
+							}
 						}
 					}
 				}
-			}
 
 
-			xx++;
-			if(_busi.relation.equalsIgnoreCase("引用")){
-				break;
-			}
-			if(!_r) {
-				if (!leaderSet.contains(_busi.post_business_id)) {
-					findNext(leaderSet, nodeSet, linkSet, categorySet, nodeList, linkList, categoryList, _busi.post_business_id, keyword, node.x, node.y, _x_d, _y_d,xx);
+				xx++;
+				if(_busi.relation.equalsIgnoreCase("引用")){
+					break;
 				}
+				if(!_r) {
+					if (!leaderSet.contains(_busi.post_business_id)) {
+						findNext(leaderSet, nodeSet, linkSet, categorySet, nodeList, linkList, categoryList, _busi.post_business_id, keyword, node.x, node.y, _x_d, _y_d,xx);
+					}
+				}
+				i++;
 			}
-
-			i++;
 
 		}
 	}
