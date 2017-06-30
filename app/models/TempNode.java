@@ -18,6 +18,12 @@ public class TempNode implements Comparable<TempNode> {
     public Integer x;
 
     public Integer y;
+    
+    public boolean isleaf = false;
+    
+    public String source;
+    
+    public String target;
 
     @Override
     public int compareTo(TempNode o) {
