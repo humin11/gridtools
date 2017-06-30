@@ -197,9 +197,6 @@
 		var listBusiness = '${businessList}';
 	    var jsonObject = JSON.parse(listBusiness.replace(/&quot;/g,'"').replace(/[\r\n]/g,""));
 	    for(j in jsonObject){
-	    	if (j > 5) {
-	    		break;
-	    	}
 	    	var json = jsonObject[j];
 	    	colorMap.clear();
 	    	let key = json.business_id;
